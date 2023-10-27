@@ -22,5 +22,6 @@ Therefore we are utilizing the ERA5 data from the Climate data store.
 ## Next steps
 
 - Write function for processing netcdf file.
-  - Calculate wind speed and wind direction from u and v component
-  - Aggregate to one value
+  - Calculate monthly aggregated wind speed and wind direction from u and v component (x)
+  - Refactor code
+  - Integrate wind into API
