@@ -1,23 +1,53 @@
-import datetime
+from fastapi import FastAPI, Query
+from pydantic import BaseModel
 from api_clients.cds import get_historical_wind_data
-from utils.data_transform import transform_wind_nc_to_geojson
+from utils.data_transform import create_wind_geojson
+from enum import Enum
+import datetime
+from typing import List
+
+"""
+{
+  "min_lat": 48.289416,
+  "min_lon": 14.263430,
+  "max_lat": 48.315876,
+  "max_lon": 14.314499
+}
+"""
+
+# TODO instead of Bounding, mabye just a coordinate would be better-
 
 
-if __name__ == "__main__":
+class BoundingBox(BaseModel):
+    min_lat: float
+    min_lon: float
+    max_lat: float
+    max_lon: float
 
-    # specify paths
+
+class WindParameterValue(str, Enum):
+    speed = "speed"
+    direction = "direction"
+
+
+app = FastAPI()
+
+
+@app.post("/wind-data")
+def get_wind_data(wind_parameter: WindParameterValue, bb: BoundingBox):
+
+    # Specify paths
+    # TODO create path dynamically, based on project ID
     path_to_wind_data_nc = "../data/wind_linz.nc"
-    path_to_wind_speed_agg = "../data/wind_speed_linz.geojson"
-    path_to_wind_direction_agg = "../data/wind_direction_linz.geojson"
 
-    # define parameters
+    # Download data from CDS for last 5 years from today
     today = datetime.date.today()
-    years = [str(today.year - i) for i in range(1, 6)]
-    bb = [48.272926, 14.250641, 48.315057, 14.327202]
+    years = [str(today.year - i) for i in range(1, 10)]
+    bb_list = [bb.min_lat, bb.min_lon, bb.max_lat, bb.max_lon]
+    get_historical_wind_data(path_to_wind_data_nc, bb_list, years)
 
-    # download data from CDS
-    get_historical_wind_data(path_to_wind_data_nc, bb, years)
+    # Transform wind data to aggregated direction or speed and save as geojson
+    wind_data = create_wind_geojson(
+        path_to_wind_data_nc, wind_parameter, years)
 
-    # transform wind data to aggregated direction and speed and save as geojson
-    transform_wind_nc_to_geojson(
-        path_to_wind_data_nc, path_to_wind_speed_agg, path_to_wind_direction_agg)
+    return wind_data

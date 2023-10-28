@@ -2,5 +2,6 @@ python-dotenv
 requests
 cdsapi
 netCDF4
-geopandas
 geojson
+fastapi
+uvicorn[standard]

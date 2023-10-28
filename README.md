@@ -15,6 +15,21 @@ Therefore we want to download wind data for the last X year of the AOI and calcu
 There are some API providers for wind data, but it seems that for historical wind data you have to pay.
 Therefore we are utilizing the ERA5 data from the Climate data store.
 
+Example for request to FastAPI for wind data
+
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/wind-data?wind_parameter=direction' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "min_lat": 48.289416,
+  "min_lon": 14.263430,
+  "max_lat": 48.315876,
+  "max_lon": 14.314499
+}'
+```
+
 ## Sun
 
 ## Elevation
@@ -22,6 +37,4 @@ Therefore we are utilizing the ERA5 data from the Climate data store.
 ## Next steps
 
 - Write function for processing netcdf file.
-  - Calculate monthly aggregated wind speed and wind direction from u and v component (x)
-  - Refactor code
-  - Integrate wind into API
+  - Qualitative validation of wind data by using some example areas and check wind patterns
