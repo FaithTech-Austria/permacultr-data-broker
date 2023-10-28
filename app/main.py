@@ -33,12 +33,12 @@ class WindParameterValue(str, Enum):
 app = FastAPI()
 
 
-@app.post("/wind-data")
-def get_wind_data(wind_parameter: WindParameterValue, bb: BoundingBox):
+@app.post("/wind")
+def get_wind_data(parameter: WindParameterValue, bb: BoundingBox):
 
     # Specify paths
     # TODO create path dynamically, based on project ID
-    path_to_wind_data_nc = "../data/wind_linz.nc"
+    path_to_wind_data_nc = "../data/intermediate_wind_data.nc"
 
     # Download data from CDS for last 5 years from today
     today = datetime.date.today()
@@ -48,6 +48,6 @@ def get_wind_data(wind_parameter: WindParameterValue, bb: BoundingBox):
 
     # Transform wind data to aggregated direction or speed and save as geojson
     wind_data = create_wind_geojson(
-        path_to_wind_data_nc, wind_parameter, years)
+        path_to_wind_data_nc, parameter, years)
 
     return wind_data

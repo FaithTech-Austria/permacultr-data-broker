@@ -19,7 +19,7 @@ Example for request to FastAPI for wind data
 
 ```bash
 curl -X 'POST' \
-  'http://localhost:8000/wind-data?wind_parameter=direction' \
+  'http://localhost:8000/wind?parameter=direction' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
