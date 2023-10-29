@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Query
 from pydantic import BaseModel
-from api_clients.cds import get_historical_wind_data
-from utils.data_transform import create_wind_geojson
 from enum import Enum
 import datetime
-from typing import List
+
+from api_clients.cds import get_historical_wind_data
+from utils.data_transform import create_wind_geojson
 
 """
 {
@@ -33,12 +33,12 @@ class WindParameterValue(str, Enum):
 app = FastAPI()
 
 
-@app.post("/wind")
+@app.post("/api/wind/")
 def get_wind_data(parameter: WindParameterValue, bb: BoundingBox):
 
     # Specify paths
     # TODO create path dynamically, based on project ID
-    path_to_wind_data_nc = "../data/intermediate_wind_data.nc"
+    path_to_wind_data_nc = "data/intermediate_wind_data.nc"
 
     # Download data from CDS for last 5 years from today
     today = datetime.date.today()

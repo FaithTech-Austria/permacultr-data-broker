@@ -1,7 +1,6 @@
 import netCDF4 as nc
 import numpy as np
 from geojson import Feature, Point, FeatureCollection, dump
-import os
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -64,8 +63,10 @@ def create_wind_geojson(path_to_wind_nc_file: str, wind_property: str, years: li
         wind_property_features = create_feature_collection(
             latitude, longitude, wind_mnt_avg)
         wind_property_features["name"] = wind_property
-        wind_property_features["description"] = f"Monthly averages over the last {
-            len(years)} years"
+        # wind_property_features["description"] = f"Monthly averages over the last {
+        #    len(years)} years"
+        wind_property_features["description"] = "Monthly averages over the last {} years".format(
+            len(years))
         return wind_property_features
 
     finally:
