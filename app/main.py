@@ -4,16 +4,8 @@ from enum import Enum
 import datetime
 
 from api_clients.cds import get_historical_wind_data
-from utils.data_transform import create_wind_geojson
+from app.utils.wind_data_transform import create_wind_geojson
 
-"""
-{
-  "min_lat": 48.289416,
-  "min_lon": 14.263430,
-  "max_lat": 48.315876,
-  "max_lon": 14.314499
-}
-"""
 
 # TODO instead of Bounding, mabye just a coordinate would be better-
 

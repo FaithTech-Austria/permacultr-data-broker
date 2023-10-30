@@ -5,3 +5,4 @@ netCDF4
 geojson
 fastapi
 uvicorn[standard]
+scipy
