@@ -6,3 +6,4 @@ geojson
 fastapi
 uvicorn[standard]
 scipy
+matplotlib

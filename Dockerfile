@@ -8,6 +8,7 @@ WORKDIR /app
 COPY /app .
 COPY .env .
 COPY requirements.txt .
+RUN mkdir data 
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt

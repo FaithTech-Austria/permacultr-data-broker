@@ -34,15 +34,3 @@ def get_historical_wind_data(path_to_output: str, bounding_box: list, years: lis
             'format': 'netcdf',
         },
         path_to_output)
-
-
-if __name__ == "__main__":
-
-    # specify input parameters
-    today = datetime.date.today()
-    years = [str(today.year - i) for i in range(1, 6)]
-    bb = []
-    path_to_wind_data = "../../data/wind.nc"
-
-    # retrieve wind data from cds
-    get_historical_wind_data(path_to_wind_data, bb, years)
