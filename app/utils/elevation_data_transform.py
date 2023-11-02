@@ -1,12 +1,10 @@
 import numpy as np
-from shapely.geometry import Point
+from shapely.geometry import Point, LineString
 import pyproj
 import matplotlib.pyplot as plt
 import geojson
 import requests
 from shapely.ops import transform
-
-
 import numpy as np
 import pyproj
 from shapely.geometry import Point
@@ -68,7 +66,6 @@ def get_elevation_data(locations: list) -> np.array:
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
-        print(data)
         # Process the API response data as needed
         elev_grid = np.array([result["elevation"]
                              for result in data["results"]])
@@ -77,24 +74,66 @@ def get_elevation_data(locations: list) -> np.array:
         return None
 
 
+def vertex_on_boundary(vertex: list, bounds: list) -> bool:
+    """check if point is on boundary"""
+    lat_max, lat_min, lon_max, lon_min = bounds
+    return (vertex[0] == lat_max) | (vertex[0] == lat_min) | (vertex[1] == lon_max) | (vertex[1] == lon_min)
+
+
+def crosses_existing_lines(line: LineString, existing_lines: list[LineString]) -> bool:
+    """check if line crosses with any other lines in the lists"""
+    return any(line.crosses(other_line) for other_line in existing_lines)
+
+
 def extract_contour_lines(lat_grid: np.array, lon_grid: np.array, elev_grid: np.array, levels: int | list) -> dict:
     """get contour lines from regular point grid and convert to geojson format"""
 
-    cs = plt.contour(lat_grid, lon_grid, elev_grid, levels=levels)
-    contour_lines = []
+    lat_max, lat_min, lon_max, lon_min = np.amax(lat_grid), np.amin(
+        lat_grid), np.amax(lon_grid), np.amin(lon_grid)
+    bounds = [lat_max, lat_min, lon_max, lon_min]
 
-    # Extract contour data and create LineString geometries
+    cs = plt.contour(lat_grid, lon_grid, elev_grid, levels=levels)
+
+    contour_lines = []
+    all_lines = []
+    vertices_first_list, vertices_second_list = [], []
+
     for i, collection in enumerate(cs.collections):
         elevation = cs.levels[i]
         for path in collection.get_paths():
-            coordinates = [vertex.tolist() for vertex in path.vertices]
-            if coordinates:
+            vertices = [vertex.tolist() for vertex in path.vertices]
+            for i, j in zip(range(0, len(vertices)), range(1, len(vertices))):
+
+                vertices_first_list.append(vertices[i])
+                vertices_second_list.append(vertices[j])
+                line = LineString([vertices[i], vertices[j]])
+                all_lines.append(line)
                 contour_lines.append(geojson.Feature(
-                    geometry=geojson.LineString(coordinates),
+                    geometry=geojson.LineString(
+                        [vertices[i], vertices[j]]),
                     properties={"elevation": elevation}
                 ))
 
-    # Create a GeoJSON feature collection
+    remove_idx = []
+    for i in range(len(all_lines)):
+        vertex_first = vertices_first_list[i]
+        vertex_second = vertices_second_list[i]
+        line = all_lines[i]
+
+        if crosses_existing_lines(line, all_lines) & (vertex_on_boundary(vertex_first, bounds)) & (vertex_on_boundary(vertex_second, bounds)):
+            remove_idx.append(i)
+
+    lines_reduced = list(np.delete(np.array(all_lines), remove_idx))
+
+    for i in range(len(all_lines)):
+        vertex_first = vertices_first_list[i]
+        vertex_second = vertices_second_list[i]
+        line = all_lines[i]
+
+        if crosses_existing_lines(line, lines_reduced) & ((vertex_on_boundary(vertices_first_list[i], bounds)) | (vertex_on_boundary(vertex_second, bounds))):
+            remove_idx.append(i)
+
+    contour_lines = list(np.delete(np.array(contour_lines), remove_idx))
     feature_collection = geojson.FeatureCollection(contour_lines)
     return feature_collection
 
@@ -104,6 +143,8 @@ if __name__ == "__main__":
     # specify bounding box and spacing between points in regular grid
     bb_list = [48.289416, 14.263430, 48.315876, 14.314499]
     bb_list = [47.855281, 14.365568, 47.880206, 14.404243]
+    bb_list = [47.060994, 15.414642, 47.085363, 15.455275]
+
     distance_between_points_meter = 500
 
     # create regular grid
@@ -122,7 +163,7 @@ if __name__ == "__main__":
 
         # extract contour lines
         contour_lines = extract_contour_lines(
-            lat_grid_wgs84, lon_grid_wgs84, elevation_grid, levels=100)
+            lat_grid_wgs84, lon_grid_wgs84, elevation_grid, levels=20)
 
         # save as geojson
         with open("contour_lines.geojson", "w") as f:
