@@ -1,26 +1,9 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
-from enum import Enum
+from fastapi import FastAPI
 import datetime
 
 from api_clients.cds import get_historical_wind_data
 from app.utils.wind_data_transform import create_wind_geojson
-
-
-# TODO instead of Bounding, mabye just a coordinate would be better-
-
-
-class BoundingBox(BaseModel):
-    min_lat: float
-    min_lon: float
-    max_lat: float
-    max_lon: float
-
-
-class WindParameterValue(str, Enum):
-    speed = "speed"
-    direction = "direction"
-
+from models import BoundingBox, WindParameterValue
 
 app = FastAPI()
 

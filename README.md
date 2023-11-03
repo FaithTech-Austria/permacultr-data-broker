@@ -65,4 +65,9 @@ curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
 - We want to create contourlines within the bounding box and return a Geojson containing the contour lines
 - Making elevation contour lines available in our API
 
+- Contour Lines:
+  - Access SRTM 30 data from somewhere
+  - Clip it to bounding box and save it
+  - with gdal, create contour lines and save as geojson
+
 ## Sun
