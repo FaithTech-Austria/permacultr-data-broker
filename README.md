@@ -78,3 +78,7 @@ curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
   - with gdal, create contour lines and save as geojson
 
 ## Sun
+
+### TODOs
+
+- Set up of docker, with volume bind to code and enabling update in docker when code is changed
