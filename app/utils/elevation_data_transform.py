@@ -1,17 +1,11 @@
 import numpy as np
-from shapely.geometry import Point, LineString
-import pyproj
-import matplotlib.pyplot as plt
-import geojson
 import requests
-from shapely.ops import transform
-import numpy as np
-import pyproj
-from shapely.geometry import Point
-from shapely.ops import transform
-
 import subprocess
 from osgeo import gdal, osr
+import pyproj
+import geojson
+from shapely.geometry import Point
+from shapely.ops import transform
 
 
 def reproject_point(point: Point, source_crs: pyproj.CRS, target_crs: pyproj.CRS) -> Point:
@@ -45,10 +39,14 @@ def create_regular_grid(bounding_box: list, point_spacing_metres: int) -> tuple:
     lon_grid_wgs84, lat_grid_wgs84 = transformer.transform(
         lon_grid_3857, lat_grid_3857)
 
+    # for latitude lowest values in first row, for longitude lowest values in first column
+    lon_grid_wgs84 = np.rot90(lon_grid_wgs84)
+    lat_grid_wgs84 = np.flip(np.rot90(lat_grid_wgs84), axis=0)
+
     return (lat_grid_wgs84, lon_grid_wgs84)
 
 
-def get_elevation_data(locations: list) -> np.array:
+def get_elevation_data(locations: list[(float, float)]) -> np.array:
     """get elevation data for a lit of coordinate tuples"""
 
     base_url = "https://api.opentopodata.org/v1/srtm90m?locations="
@@ -75,7 +73,26 @@ def get_elevation_data(locations: list) -> np.array:
         return None
 
 
-def create_arrays_from_json(json_data):
+def create_geojson_from_from_points(elevation_data: dict[(float, float), float], path_to_output: str) -> None:
+
+    # Create a list of GeoJSON features
+    features = []
+    for (lon, lat), elevation in elevation_data.items():
+        point = geojson.Point((lon, lat))
+        properties = {'elevation': elevation}
+        feature = geojson.Feature(geometry=point, properties=properties)
+        features.append(feature)
+
+    # Create a GeoJSON feature collection
+    feature_collection = geojson.FeatureCollection(features)
+
+    # Save the feature collection as a GeoJSON file
+    with open(path_to_output, 'w') as geojson_file:
+        geojson.dump(feature_collection, geojson_file,
+                     sort_keys=True, ensure_ascii=False)
+
+
+def extract_elevation_data(json_data):
     # Extract latitude, longitude, and elevation values from the JSON data
 
     latitudes = [entry['location']['lat'] for entry in json_data['results']]
@@ -89,113 +106,102 @@ def create_arrays_from_json(json_data):
     return data
 
 
-if __name__ == "__main__":
-
-    # specify bounding box and spacing between points in regular grid
-    bb_list = [48.289416, 14.263430, 48.315876, 14.314499]
-    bb_list = [47.855281, 14.365568, 47.880206, 14.404243]
-    # bb_list = [47.060994, 15.414642, 47.085363, 15.455275]
-    bb_list = [-13.526504, -72.013784, -13.491379, -71.965204]
-
-    distance_between_points_meter = 1000
-
-    # create regular grid
-    lon_grid_wgs84, lat_grid_wgs84 = create_regular_grid(
-        bb_list, distance_between_points_meter)
-
-    lon_grid_wgs84 = np.rot90(lon_grid_wgs84)
-    lat_grid_wgs84 = np.flip(np.rot90(lat_grid_wgs84), axis=0)
-
-    # create coordinate tuples
-    grid_points = [(lat, lon) for lat, lon in zip(
-        lat_grid_wgs84.flatten(), lon_grid_wgs84.flatten())]
-
-    # get elevation data
-    elevation_data = get_elevation_data(grid_points)
-    elevation_data_orderered = create_arrays_from_json(elevation_data)
-
-    # Create a list of GeoJSON features
-    features = []
-    for (lon, lat), elevation in elevation_data_orderered.items():
-        point = geojson.Point((lon, lat))
-        properties = {'elevation': elevation}
-        feature = geojson.Feature(geometry=point, properties=properties)
-        features.append(feature)
-
-    # Create a GeoJSON feature collection
-    feature_collection = geojson.FeatureCollection(features)
-
-    # Save the GeoJSON feature collection to a file
-    with open('elevation_data.geojson', 'w') as file:
-        geojson.dump(feature_collection, file,
-                     sort_keys=True, ensure_ascii=False)
+def create_elevation_raster(lon_arr: np.array, lat_arr: np.array, elevation_data: dict, path_to_output: str) -> None:
+    """create a elevation raster and save as geotiff based on a regular grid with corresponding elevation data"""
 
     def custom_get(x, y):
-        return elevation_data_orderered[(x, y)]
+        return elevation_data[(x, y)]
 
     # Use np.vectorize with the custom_get function
     vfunc = np.vectorize(custom_get)
-    elevation_grid = vfunc(lon_grid_wgs84, lat_grid_wgs84)
-
-    # Define the output GeoTIFF file path
-    output_tiff_path = "output.tif"
-
-    longitude = lon_grid_wgs84
-    latitude = lat_grid_wgs84
-    values = np.flip(elevation_grid, axis=0)
+    elevation_arr = vfunc(lon_arr, lat_arr)
+    elevation_arr = np.flip(elevation_arr, axis=0)
 
     # Calculate pixel width and pixel height based on your arrays
-    pixel_width = (longitude[0, 1] - longitude[0, 0])
-    pixel_height = (latitude[1, 0] - latitude[0, 0])
-    image_width = longitude.shape[1]
-    image_height = latitude.shape[0]
+    pixel_width = (lon_arr[0, 1] - lon_arr[0, 0])
+    pixel_height = (lat_arr[1, 0] - lat_arr[0, 0])
+    image_width = lon_arr.shape[1]
+    image_height = lat_arr.shape[0]
 
     # Create a new GeoTIFF dataset
     driver = gdal.GetDriverByName('GTiff')
-    dataset = driver.Create(output_tiff_path, image_width,
+    dataset = driver.Create(path_to_output, image_width,
                             image_height, 1, gdal.GDT_Float32)
     srs = osr.SpatialReference()
+
     # Replace with the appropriate EPSG code for your data
     srs.ImportFromEPSG(4326)
     dataset.SetProjection(srs.ExportToWkt())
 
+    # specify offset
     offset_lon = pixel_width / 2
     offset_lat = pixel_height / 2
 
-    geotransform = (longitude[0, 0] - offset_lon, pixel_width, 0,
-                    latitude[-1, 0] + offset_lat, 0, -pixel_height)
+    geotransform = (lon_arr[0, 0] - offset_lon, pixel_width, 0,
+                    lat_arr[-1, 0] + offset_lat, 0, -pixel_height)
     dataset.SetGeoTransform(geotransform)
 
     # Write the values to the GeoTIFF
     band = dataset.GetRasterBand(1)
-    band.WriteArray(values)
+    band.WriteArray(elevation_arr)
 
     # Close the dataset to save the GeoTIFF
     dataset = None
 
     # Use subprocess to compress the GeoTIFF using GDAL utilities (optional)
+    path_to_output_comp = path_to_output.replace(".tif", "_comp.tif")
     subprocess.call(['gdal_translate', '-of', 'GTiff', '-co',
-                    'COMPRESS=LZW', output_tiff_path, 'compressed_output.tif'])
+                    'COMPRESS=LZW', path_to_output, path_to_output_comp])
 
-    # Replace with the desired output file name and format
-    output_contour_geojson = "contour_lines.geojson"
+
+def create_contour_lines(path_to_elevation_grid: str, path_to_output: str, contour_interval: int) -> None:
+    """create contour line vector data based on elevation raster"""
+
+    gdal_contour_command = [
+        "gdal_contour",
+        "-a", "elevation",
+        "-i", str(contour_interval),
+        "-snodata", "0",
+        path_to_elevation_grid,
+        path_to_output,
+    ]
+
+    subprocess.run(gdal_contour_command, check=True)
+
+
+if __name__ == "__main__":
+
+    # Define the output GeoTIFF file path
+    path_to_elevation_tif = "../../data/contour_intermediate/elevation.tif"
+    path_to_elevation_points_geojson = "../../data/contour_intermediate/elevation_points.geojson"
+    path_to_contour_lines_geojson = "../../data/contour_intermediate/contour_lines.geojson"
+
+    # specify bounding box and spacing between points in regular grid
+    bb_list = [47.060994, 15.414642, 47.085363, 15.455275]
+    distance_between_points_meter = 400
 
     # Define the contour interval (e.g., 10) and other options as needed
     contour_interval = 10
 
-    # Build the gdal_contour command
-    gdal_contour_command = [
-        "gdal_contour",
-        "-a", "elevation",  # Attribute field name
-        "-i", str(contour_interval),  # Contour interval
-        "-snodata", "0",  # NoData value
-        output_tiff_path,  # Input GeoTIFF file
-        output_contour_geojson,  # Output contour Shapefile
-    ]
+    # create longitude and latitude array representing a regular grid
+    longitude_arr, latitude_arr = create_regular_grid(
+        bb_list, distance_between_points_meter)
 
-    # Execute the gdal_contour command
-    try:
-        subprocess.run(gdal_contour_command, check=True)
-        print("Contour lines generated successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to generate contour lines. Error: {e}")
+    # create list with coordinate tuples
+    grid_points = [(lat, lon) for lat, lon in zip(
+        latitude_arr.flatten(), longitude_arr.flatten())]
+
+    # get elevation data
+    elevation_data = get_elevation_data(grid_points)
+    elevation_data_dict = extract_elevation_data(elevation_data)
+
+    create_geojson_from_from_points(
+        elevation_data_dict, path_to_elevation_points_geojson)
+
+    # create elevation grid
+    create_elevation_raster(longitude_arr, latitude_arr,
+                            elevation_data_dict, path_to_elevation_tif)
+
+    # create contour lines
+    create_contour_lines(path_to_elevation_tif,
+                         path_to_contour_lines_geojson, contour_interval)
