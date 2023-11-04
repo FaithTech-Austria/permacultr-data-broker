@@ -8,6 +8,13 @@ The data broker accesses various APIs, transforms the data and exposes the trans
 - Here you can store all API keys and other credentials
 - For using the CDS API set **CDS_API_URL** and **CDS_API_KEY**
 
+### Conda installs
+
+```bash
+conda install -c conda-forge gdal
+pip install -r requirements.txt
+```
+
 ## Wind
 
 Wind speed and direction patterns are required.
