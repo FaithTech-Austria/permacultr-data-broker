@@ -172,9 +172,9 @@ def create_contour_lines(path_to_elevation_grid: str, path_to_output: str, conto
 if __name__ == "__main__":
 
     # Define the output GeoTIFF file path
-    path_to_elevation_tif = "../../data/contour_intermediate/elevation.tif"
-    path_to_elevation_points_geojson = "../../data/contour_intermediate/elevation_points.geojson"
-    path_to_contour_lines_geojson = "../../data/contour_intermediate/contour_lines.geojson"
+    path_to_elevation_tif = "data/contour_intermediate/elevation.tif"
+    path_to_elevation_points_geojson = "data/contour_intermediate/elevation_points.geojson"
+    path_to_contour_lines_geojson = "data/contour_intermediate/contour_lines.geojson"
 
     # specify bounding box and spacing between points in regular grid
     bb_list = [47.060994, 15.414642, 47.085363, 15.455275]

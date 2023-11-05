@@ -3,5 +3,4 @@ requests
 cdsapi
 netCDF4
 geojson
-fastapi
-uvicorn[standard]
+fastapi[all]

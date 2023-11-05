@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 import datetime
 
-from api_clients.cds import get_historical_wind_data
-from utils.wind_data_transform import create_wind_geojson
-from models import BoundingBox, WindParameterValue
+from app.api_clients.cds import get_historical_wind_data
+from app.utils.wind_data_transform import create_wind_geojson
+from app.models import BoundingBox, WindParameterValue
 
 app = FastAPI()
 
