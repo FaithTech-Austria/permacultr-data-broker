@@ -83,3 +83,4 @@ curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
 
 - Set up of docker, with volume bind to code and enabling update in docker when code is changed
 - Create environment, where gdal works with other packages. Create requirements file with versions
+- LATEST ISSUE --> gdal does not seem to be installed. Work on issue in DOckerfile
