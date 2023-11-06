@@ -3,4 +3,6 @@ requests
 cdsapi
 netCDF4
 geojson
+pyproj
+shapely
 fastapi[all]

@@ -1,0 +1,7 @@
+name: env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - gdal=3.7.3

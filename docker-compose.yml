@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+    volumes:
+      - ./data/contour_intermediate:/code/data
     ports:
       - "8080:80"
   elevation:

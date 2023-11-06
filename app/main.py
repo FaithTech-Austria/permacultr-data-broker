@@ -13,7 +13,7 @@ def get_wind_data(parameter: WindParameterValue, bb: BoundingBox):
 
     # Specify paths
     # TODO create path dynamically, based on project ID
-    path_to_wind_data_nc = "data/intermediate_wind_data.nc"
+    path_to_wind_data_nc = "../../data/intermediate_wind_data.nc"
 
     # Download data from CDS for last 5 years from today
     today = datetime.date.today()

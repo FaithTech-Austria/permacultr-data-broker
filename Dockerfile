@@ -6,16 +6,16 @@ FROM continuumio/miniconda3
 # Set the working directory to /code
 WORKDIR /code
 
-RUN conda create -n env python=3.11
+ADD environment/environment.yml /tmp/environment.yml
+RUN conda env create -f /tmp/environment.yml
 RUN echo "source activate env" > ~/.bashrc
 ENV PATH /opt/conda/envs/env/bin:$PATH
 
-RUN conda install -c conda-forge gdal
-COPY requirements.txt .
+COPY environment/requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN mkdir data/
 COPY /app /code/app
-RUN mkdir /code/data
 COPY .env .
 
 # Run main.py when the container launches
