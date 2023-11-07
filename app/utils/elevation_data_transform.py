@@ -1,5 +1,4 @@
 import numpy as np
-import requests
 import subprocess
 from osgeo import gdal, osr
 import pyproj
@@ -46,34 +45,7 @@ def create_regular_grid(bounding_box: list, point_spacing_metres: int) -> tuple:
     return (lat_grid_wgs84, lon_grid_wgs84)
 
 
-def get_elevation_data(locations: list[(float, float)]) -> np.array:
-    """get elevation data for a lit of coordinate tuples"""
-
-    base_url = "https://api.opentopodata.org/v1/srtm90m?locations="
-
-    # Generate query URLs for each location
-    query_urls = []
-    for lon, lat in locations:
-        query_url = f"{lon}, {lat}"
-        query_urls.append(query_url)
-
-    # create string
-    query_string = "|".join(query_urls)
-    final_url = base_url + query_string
-
-    # Send a GET request to the API
-    response = requests.get(final_url)
-
-    # Check if the request was successful
-    if response.status_code == 200:
-        data = response.json()
-        return data
-    else:
-        print("Elevation retrieval from API did not work")
-        return None
-
-
-def create_geojson_from_from_points(elevation_data: dict[(float, float), float], path_to_output: str) -> None:
+def create_elevation_points_geojson(elevation_data: dict[(float, float), float], path_to_output: str) -> None:
 
     # Create a list of GeoJSON features
     features = []
@@ -154,7 +126,7 @@ def create_elevation_raster(lon_arr: np.array, lat_arr: np.array, elevation_data
                     'COMPRESS=LZW', path_to_output, path_to_output_comp])
 
 
-def create_contour_lines(path_to_elevation_grid: str, path_to_output: str, contour_interval: int) -> None:
+def create_contour_lines_geojson(path_to_elevation_grid: str, path_to_output: str, contour_interval: int) -> None:
     """create contour line vector data based on elevation raster"""
 
     gdal_contour_command = [
@@ -171,37 +143,8 @@ def create_contour_lines(path_to_elevation_grid: str, path_to_output: str, conto
 
 if __name__ == "__main__":
 
-    # Define the output GeoTIFF file path
-    path_to_elevation_tif = "/code/data/elevation_test.tif"
-    path_to_elevation_points_geojson = "/code/data/elevation_points.geojson"
-    path_to_contour_lines_geojson = "/code/data/contour_lines.geojson"
+    # bb_list = [47.060994, 15.414642, 47.085363, 15.455275]
+    # distance_between_points_meter = 400
+    # contour_interval = 10
 
-    # specify bounding box and spacing between points in regular grid
-    bb_list = [47.060994, 15.414642, 47.085363, 15.455275]
-    distance_between_points_meter = 400
-
-    # Define the contour interval (e.g., 10) and other options as needed
-    contour_interval = 10
-
-    # create longitude and latitude array representing a regular grid
-    longitude_arr, latitude_arr = create_regular_grid(
-        bb_list, distance_between_points_meter)
-
-    # create list with coordinate tuples
-    grid_points = [(lat, lon) for lat, lon in zip(
-        latitude_arr.flatten(), longitude_arr.flatten())]
-
-    # get elevation data
-    elevation_data = get_elevation_data(grid_points)
-    elevation_data_dict = extract_elevation_data(elevation_data)
-
-    create_geojson_from_from_points(
-        elevation_data_dict, path_to_elevation_points_geojson)
-
-    # create elevation grid
-    create_elevation_raster(longitude_arr, latitude_arr,
-                            elevation_data_dict, path_to_elevation_tif)
-
-    # create contour lines
-    create_contour_lines(path_to_elevation_tif,
-                         path_to_contour_lines_geojson, contour_interval)
+    pass

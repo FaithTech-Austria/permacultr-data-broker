@@ -81,7 +81,5 @@ curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
 
 ### TODOs
 
-- Current state: docker conda is working with gdal
-- Next step: Create volume bind to code - so that changes are applied to docker even when running
 - Integrate elevation contours into API
 - Switch from opentopodata api to self-hosted open elevation api to prevent request limitation

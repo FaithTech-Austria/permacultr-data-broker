@@ -63,8 +63,6 @@ def create_wind_geojson(path_to_wind_nc_file: str, wind_property: str, years: li
         wind_property_features = create_feature_collection(
             latitude, longitude, wind_mnt_avg)
         wind_property_features["name"] = f"wind {wind_property}"
-        # wind_property_features["description"] = f"Monthly averages over the last {
-        #    len(years)} years"
         wind_property_features["description"] = "Monthly averages over the last {} years".format(
             len(years))
         return wind_property_features

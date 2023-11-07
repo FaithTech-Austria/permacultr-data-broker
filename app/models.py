@@ -12,3 +12,7 @@ class BoundingBox(BaseModel):
 class WindParameterValue(str, Enum):
     speed = "speed"
     direction = "direction"
+
+
+class ContourInterval(BaseModel):
+    value: int
