@@ -135,7 +135,7 @@ def create_contour_lines_geojson(path_to_elevation_grid: str, path_to_output: st
         "-i", str(contour_interval),
         "-snodata", "0",
         path_to_elevation_grid,
-        path_to_output,
+        path_to_output
     ]
 
     subprocess.run(gdal_contour_command, check=True)

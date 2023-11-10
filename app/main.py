@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import datetime
 import geojson
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv, dotenv_values
 import os
 
 from app.api_clients.cds import get_historical_wind_data
@@ -15,7 +15,7 @@ from app.utils.elevation_data_transform import (
     create_contour_lines_geojson)
 from app.models import BoundingBox, WindParameterValue, ContourInterval
 
-load_dotenv()
+find_dotenv("/code/.env")
 
 # Load paths from env variables
 PATH_TO_HISTORIC_WIND_DATA = os.getenv("PATH_TO_HISTORIC_WIND_DATA")
@@ -51,6 +51,8 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox) -> dic
     # spacing should always be 30 if srtm30 is used.
     spacing = 500
 
+    print(f"Path to elevation: {PATH_TO_ELEVATION_POINTS}")
+
     # create longitude and latitude array representing a regular grid
     bb_list = [bb.min_lat, bb.min_lon, bb.max_lat, bb.max_lon]
     longitude_arr, latitude_arr = create_regular_grid(
@@ -74,7 +76,7 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox) -> dic
 
     # create contour lines
     create_contour_lines_geojson(PATH_TO_ELEVATION_RASTER,
-                                 PATH_TO_CONTOUR_LINES, contour_interval)
+                                 PATH_TO_CONTOUR_LINES, contour_interval.value)
 
     # read geojson from file and return
     with open(PATH_TO_CONTOUR_LINES) as f:

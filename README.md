@@ -81,5 +81,5 @@ curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
 
 ### TODOs
 
-- Integrate elevation contours into API
-- Switch from opentopodata api to self-hosted open elevation api to prevent request limitation
+- Setting paths from env variables does not seem to work
+- Improve code in main (especially in elevation)
