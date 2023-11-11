@@ -16,3 +16,7 @@ class WindParameterValue(str, Enum):
 
 class ContourInterval(BaseModel):
     value: int
+
+
+class Resolution(BaseModel):
+    value: int

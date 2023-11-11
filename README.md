@@ -67,19 +67,34 @@ docker run -it -v /data:/code/data -p 80:8080 openelevation/open-elevation
 curl 'http://localhost:8000/api/v1/lookup?locations=-4.7,30'
 ```
 
-### Next steps:
+The API can be accessed in the following way:
 
-- We want to create contourlines within the bounding box and return a Geojson containing the contour lines
-- Making elevation contour lines available in our API
-
-- Contour Lines:
-  - Access SRTM 30 data from somewhere
-  - Clip it to bounding box and save it
-  - with gdal, create contour lines and save as geojson
+```bash
+curl -X 'POST' \
+  'http://localhost:8080/api/elevation/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "contour_interval": {
+    "value": 10
+  },
+  "bb": {
+    "min_lat": -8.907363,
+    "min_lon": 33.423929,
+    "max_lat": -8.899648,
+    "max_lon": 33.435409
+  },
+  "resolution": {
+    "value": 30
+  }
+}
+'
+```
 
 ## Sun
 
-### TODOs
+## TODOs
 
-- Setting paths from env variables does not seem to work
 - Improve code in main (especially in elevation)
+- Set maximum bounding box size (e.g. 1km2 == 100 hacters)
+- Update readme

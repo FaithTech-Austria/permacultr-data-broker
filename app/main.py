@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 import datetime
 import geojson
-from dotenv import load_dotenv, find_dotenv, dotenv_values
+from dotenv import load_dotenv
 import os
+import itertools
+import time
 
 from app.api_clients.cds import get_historical_wind_data
-from app.api_clients.opentopodata import get_elevation_data
+# from app.api_clients.opentopodata import get_elevation_data
+from app.api_clients.open_elevation import get_elevation_data
 from app.utils.wind_data_transform import create_wind_geojson
 from app.utils.elevation_data_transform import (
     extract_elevation_data,
@@ -13,9 +16,9 @@ from app.utils.elevation_data_transform import (
     create_elevation_points_geojson,
     create_elevation_raster,
     create_contour_lines_geojson)
-from app.models import BoundingBox, WindParameterValue, ContourInterval
+from app.models import BoundingBox, WindParameterValue, ContourInterval, Resolution
 
-find_dotenv("/code/.env")
+load_dotenv("/code/.env")
 
 # Load paths from env variables
 PATH_TO_HISTORIC_WIND_DATA = os.getenv("PATH_TO_HISTORIC_WIND_DATA")
@@ -45,25 +48,29 @@ def get_wind_data(parameter: WindParameterValue, bb: BoundingBox) -> dict:
 
 
 @app.post("/api/elevation/")
-def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox) -> dict:
-
-    # TODO solver this more elegantly.
-    # spacing should always be 30 if srtm30 is used.
-    spacing = 500
-
-    print(f"Path to elevation: {PATH_TO_ELEVATION_POINTS}")
+def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolution: Resolution) -> dict:
 
     # create longitude and latitude array representing a regular grid
     bb_list = [bb.min_lat, bb.min_lon, bb.max_lat, bb.max_lon]
     longitude_arr, latitude_arr = create_regular_grid(
-        bb_list, spacing)
+        bb_list, resolution.value)
 
     # create list with coordinate tuples
     grid_points = [(lat, lon) for lat, lon in zip(
         latitude_arr.flatten(), longitude_arr.flatten())]
 
-    # get elevation data
-    elevation_data = get_elevation_data(grid_points)
+    # send no more than 100 location requests to the API
+    elevation_data_ls = []
+    chunk_size = 100
+    for i in range(0, len(grid_points), chunk_size):
+        chunk = grid_points[i:i + chunk_size]
+        # time.sleep(2)
+        elevation_data_chunk = get_elevation_data(chunk)
+        elevation_data_ls.append(elevation_data_chunk)
+
+    elevation_data = {"results": []}
+    for elev_data_chunk in elevation_data_ls:
+        elevation_data["results"] += elev_data_chunk["results"]
 
     # TODO pack everything below into function and outsource to elevation_data_transform
     elevation_data_dict = extract_elevation_data(elevation_data)

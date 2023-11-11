@@ -45,6 +45,20 @@ def create_regular_grid(bounding_box: list, point_spacing_metres: int) -> tuple:
     return (lat_grid_wgs84, lon_grid_wgs84)
 
 
+def extract_elevation_data(json_data) -> dict:
+    # Extract latitude, longitude, and elevation values from the JSON data
+
+    latitudes = [entry['location']['lat'] for entry in json_data['results']]
+    longitudes = [entry['location']['lng'] for entry in json_data['results']]
+    elevations = [entry['elevation'] for entry in json_data['results']]
+
+    data = {}
+    for lon, lat, elev in zip(longitudes, latitudes, elevations):
+        data[(lon, lat)] = elev
+
+    return data
+
+
 def create_elevation_points_geojson(elevation_data: dict[(float, float), float], path_to_output: str) -> None:
 
     # Create a list of GeoJSON features
@@ -62,20 +76,6 @@ def create_elevation_points_geojson(elevation_data: dict[(float, float), float],
     with open(path_to_output, 'w') as geojson_file:
         geojson.dump(feature_collection, geojson_file,
                      sort_keys=True, ensure_ascii=False)
-
-
-def extract_elevation_data(json_data):
-    # Extract latitude, longitude, and elevation values from the JSON data
-
-    latitudes = [entry['location']['lat'] for entry in json_data['results']]
-    longitudes = [entry['location']['lng'] for entry in json_data['results']]
-    elevations = [entry['elevation'] for entry in json_data['results']]
-
-    data = {}
-    for lon, lat, elev in zip(longitudes, latitudes, elevations):
-        data[(lon, lat)] = elev
-
-    return data
 
 
 def create_elevation_raster(lon_arr: np.array, lat_arr: np.array, elevation_data: dict, path_to_output: str) -> None:
