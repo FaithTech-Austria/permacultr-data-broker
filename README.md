@@ -95,6 +95,6 @@ curl -X 'POST' \
 
 ## TODOs
 
-- Improve code in main (especially in elevation)
 - Set maximum bounding box size (e.g. 1km2 == 100 hacters)
 - Update readme
+- Integrate OSM API to retrieve buildings, streets ...

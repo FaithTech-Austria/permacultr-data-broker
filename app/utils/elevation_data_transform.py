@@ -14,12 +14,13 @@ def reproject_point(point: Point, source_crs: pyproj.CRS, target_crs: pyproj.CRS
     return reprojected_point
 
 
-def create_regular_grid(bounding_box: list, point_spacing_metres: int) -> tuple:
+def create_regular_grid(bounding_box: dict, point_spacing_metres: int) -> tuple:
+
     wgs84 = pyproj.CRS("EPSG:4326")
     web_mercator = pyproj.CRS("EPSG:3857")
 
-    point_lat_lon_min_4326 = Point(bounding_box[0], bounding_box[1])
-    point_lat_lon_max_4326 = Point(bounding_box[2], bounding_box[3])
+    point_lat_lon_min_4326 = Point(bounding_box.min_lat, bounding_box.min_lon)
+    point_lat_lon_max_4326 = Point(bounding_box.max_lat, bounding_box.max_lon)
 
     point_lat_lon_min_3857 = reproject_point(
         point_lat_lon_min_4326, wgs84, web_mercator)

@@ -11,9 +11,12 @@ CDS_API_KEY = os.getenv("CDS_API_KEY")
 c = cdsapi.Client(url=CDS_API_URL, key=CDS_API_KEY)
 
 
-def get_historical_wind_data(path_to_output: str, bounding_box: list, years: list):
+def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: list):
     """get monthly averaged wind data of past 5 years 
     File is saved as netcdf in specified directory"""
+
+    bb_list = [bounding_box.min_lat, bounding_box.min_lon,
+               bounding_box.max_lat, bounding_box.max_lon]
 
     c.retrieve(
         'reanalysis-era5-land-monthly-means',
@@ -30,7 +33,7 @@ def get_historical_wind_data(path_to_output: str, bounding_box: list, years: lis
                 '10', '11', '12'
             ],
             'time': '00:00',
-            'area': bounding_box,
+            'area': bb_list,
             'format': 'netcdf',
         },
         path_to_output)
