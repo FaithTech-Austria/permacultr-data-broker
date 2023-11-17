@@ -6,3 +6,4 @@ geojson
 pyproj
 shapely
 fastapi[all]
+overpy==0.6
