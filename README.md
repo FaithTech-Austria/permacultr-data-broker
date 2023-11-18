@@ -98,3 +98,7 @@ curl -X 'POST' \
 - Set maximum bounding box size (e.g. 1km2 == 100 hacters)
 - Update readme
 - Integrate OSM API to retrieve buildings, streets ...
+- For OSM retrieval we will build an own service - osmapi, which will be built upon osmnx. Osmnx has heavy dependencies and therefore I put it into an own containerized service with api. The databroker api will then access this api for data retrieval.
+- Next task is to set up the osmapi (environment, dockerfile, functions, api)
+- Restructure the project - put everything related to the main api into a seperated folder.
+- Implement tests, which can be run each time I make changes
