@@ -39,6 +39,4 @@ def get_elevation_data(locations: list[(float, float)]) -> np.array:
 
 
 if __name__ == "__main__":
-
-    data = get_elevation_data([(-4.8, 30), (-4.8, 30), (-4.8, 30)])
-    print(data)
+    pass

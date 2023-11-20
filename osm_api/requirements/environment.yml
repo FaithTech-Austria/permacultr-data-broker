@@ -1,0 +1,5 @@
+name: env
+channels:
+  - conda-forge
+dependencies:
+  - osmnx

@@ -1,12 +1,12 @@
 version: "3"
 services:
-  app:
+  permacultr-api:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./permacultr_api
+      dockerfile: Dockerfile
     volumes:
       - ./data/:/code/data
-      - ./app:/code/app
+      - ./permacultr_api/app:/code/app
     ports:
       - "8080:80"
 
@@ -16,3 +16,12 @@ services:
       - ./data/open_elevation_data:/code/data
     ports:
       - "8000:8080"
+
+  osm-api:
+    build:
+      context: ./osm_api
+      dockerfile: Dockerfile
+    volumes:
+      - ./osm_api/app:/code/app
+    ports:
+      - "8090:80"
