@@ -17,11 +17,11 @@ services:
     ports:
       - "8000:8080"
 
-  osm-api:
+  osmnx-api:
     build:
-      context: ./osm_api
+      context: ./osmnx_api
       dockerfile: Dockerfile
     volumes:
-      - ./osm_api/app:/code/app
+      - ./osmnx_api/app:/code/app
     ports:
       - "8090:80"

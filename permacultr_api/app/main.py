@@ -6,7 +6,7 @@ import os
 import time
 
 from app.api_clients.cds import get_historical_wind_data
-# from app.api_clients.opentopodata import get_elevation_data
+from app.api_clients.osmnx import get_buildings_from_osmnx
 from app.api_clients.open_elevation import get_elevation_data
 from app.utils.wind_data_transform import create_wind_geojson
 from app.utils.elevation_data_transform import (
@@ -81,6 +81,8 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolu
     return contour_lines
 
 
-@app.post("/api/sun_hours/")
-def get_sun_data():
-    pass
+@app.post("/api/osm/buildings/")
+def get_buildings_from_osm(bb: BoundingBox) -> dict:
+    """get osm buildings from osmnx api"""
+    buildings = get_buildings_from_osmnx(bb)
+    return buildings

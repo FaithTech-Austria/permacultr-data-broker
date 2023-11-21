@@ -95,11 +95,10 @@ curl -X 'POST' \
 
 ## TODOs
 
-- Set maximum bounding box size (e.g. 1km2 == 100 hacters)
+- Retrieving osm buildings from permacultr api works
+- It can happen that the API freezes when the bb box is too big
+  - Set maximum bounding box size
+  - Try out streaming json (https://www.vidavolta.io/streaming-with-fastapi/)
+- Next: integrate streets
 - Update readme
-- Integrate OSM API to retrieve buildings, streets ...
 - Implement tests, which can be run each time I make changes
-
-- Current state:
-  - API is freezing when I try to get buildings. Probably the response data is to much. Try to slim it down
-  - There might be issues with the volumes. It seemed that code is not automatically updated.
