@@ -95,10 +95,9 @@ curl -X 'POST' \
 
 ## TODOs
 
-- Retrieving osm buildings from permacultr api works
 - It can happen that the API freezes when the bb box is too big
   - Set maximum bounding box size
   - Try out streaming json (https://www.vidavolta.io/streaming-with-fastapi/)
-- Next: integrate streets
 - Update readme
 - Implement tests, which can be run each time I make changes
+- Integration of GraphCast weather forecasting into service

@@ -1,10 +1,9 @@
 import requests
 
 
-def get_buildings_from_osmnx(bb) -> dict:
-    """access internal osm api to retrieve osm buildings from bounding box"""
+def get_data_from_osmnx(bb: dict, data: str, network_type: str | None = None) -> requests.Response:
 
-    url = "http://osmnx-api:80/buildings/"
+    url = f"http://osmnx-api:80/{data}/"
 
     headers = {
         'accept': 'application/json',
@@ -12,6 +11,10 @@ def get_buildings_from_osmnx(bb) -> dict:
     }
 
     bb_dict = bb.model_dump()
+
+    if network_type:
+        url = f"{url}?network_type={network_type}"
+
     response = requests.post(url, headers=headers, json=bb_dict)
 
     # Check if the request was successful

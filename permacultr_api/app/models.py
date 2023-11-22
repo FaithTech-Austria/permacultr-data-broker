@@ -9,6 +9,11 @@ class BoundingBox(BaseModel):
     max_lon: float
 
 
+class NetworkTypeValue(str, Enum):
+    drive = "drive"
+    walk = "walk"
+
+
 class WindParameterValue(str, Enum):
     speed = "speed"
     direction = "direction"

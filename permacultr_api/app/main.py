@@ -6,7 +6,7 @@ import os
 import time
 
 from app.api_clients.cds import get_historical_wind_data
-from app.api_clients.osmnx import get_buildings_from_osmnx
+from app.api_clients.osmnx import get_data_from_osmnx
 from app.api_clients.open_elevation import get_elevation_data
 from app.utils.wind_data_transform import create_wind_geojson
 from app.utils.elevation_data_transform import (
@@ -14,7 +14,7 @@ from app.utils.elevation_data_transform import (
     create_regular_grid,
     create_elevation_raster,
     create_contour_lines_geojson)
-from app.models import BoundingBox, WindParameterValue, ContourInterval, Resolution
+from app.models import BoundingBox, WindParameterValue, ContourInterval, Resolution, NetworkTypeValue
 
 load_dotenv("/code/.env")
 
@@ -27,7 +27,7 @@ app = FastAPI()
 
 
 @app.post("/api/wind/")
-def get_wind_data(parameter: WindParameterValue, bb: BoundingBox) -> dict:
+def get_wind_data(bb: BoundingBox, parameter: WindParameterValue) -> dict:
     """get monthly wind speed and direction averaged over last 10 years """
 
     # Download data from CDS for last 10 years from today
@@ -84,5 +84,19 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolu
 @app.post("/api/osm/buildings/")
 def get_buildings_from_osm(bb: BoundingBox) -> dict:
     """get osm buildings from osmnx api"""
-    buildings = get_buildings_from_osmnx(bb)
+    buildings = get_data_from_osmnx(bb, "buildings")
     return buildings
+
+
+@app.post("/api/osm/streets/")
+def get_buildings_from_osm(bb: BoundingBox, network_type: NetworkTypeValue) -> dict:
+    """get osm streets from osmnx api"""
+    streets = get_data_from_osmnx(bb, "streets", network_type.value)
+    return streets
+
+
+@app.post("/api/osm/waterways/")
+def get_buildings_from_osm(bb: BoundingBox) -> dict:
+    """get osm waterways from osmnx api"""
+    waterways = get_data_from_osmnx(bb, "waterways")
+    return waterways
