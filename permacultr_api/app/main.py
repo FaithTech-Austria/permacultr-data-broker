@@ -7,6 +7,7 @@ import os
 from app.api_clients.cds import get_historical_wind_data
 from app.api_clients.osmnx import get_data_from_osmnx
 from app.api_clients.open_elevation import get_elevation_data
+from app.utils.utils import validate_bounding_box_size
 from app.utils.wind_data_transform import create_wind_geojson
 from app.utils.elevation_data_transform import (
     extract_elevation_data,
@@ -14,6 +15,7 @@ from app.utils.elevation_data_transform import (
     create_elevation_raster,
     create_contour_lines_geojson)
 from app.models import BoundingBox, WindParameterValue, ContourInterval, Resolution, NetworkTypeValue
+
 
 load_dotenv("/code/.env")
 
@@ -25,28 +27,29 @@ PATH_TO_CONTOUR_LINES = os.getenv("PATH_TO_CONTOUR_LINES")
 app = FastAPI()
 
 
-@app.get("/api/osm/buildings/", tags=["Base Map"])
+@app.post("/api/osm/buildings/", tags=["Base Map"])
 def get_buildings_from_osm(bb: BoundingBox) -> dict:
     """get osm buildings from osmnx api"""
+    validate_bounding_box_size(bb, 1)
     buildings = get_data_from_osmnx(bb, "buildings")
     return buildings
 
 
-@app.get("/api/osm/streets/", tags=["Base Map"])
-def get_buildings_from_osm(bb: BoundingBox, network_type: NetworkTypeValue) -> dict:
+@app.post("/api/osm/streets/", tags=["Base Map"])
+def get_streets_from_osm(bb: BoundingBox, network_type: NetworkTypeValue) -> dict:
     """get osm streets from osmnx api"""
     streets = get_data_from_osmnx(bb, "streets", network_type.value)
     return streets
 
 
-@app.get("/api/osm/waterways/", tags=["Base Map"])
-def get_buildings_from_osm(bb: BoundingBox) -> dict:
+@app.post("/api/osm/waterways/", tags=["Base Map"])
+def get_waterways_from_osm(bb: BoundingBox) -> dict:
     """get osm waterways from osmnx api"""
     waterways = get_data_from_osmnx(bb, "waterways")
     return waterways
 
 
-@app.get("/api/wind/", tags=["Sector Map"])
+@app.post("/api/wind/", tags=["Sector Map"])
 def get_wind_data(bb: BoundingBox, parameter: WindParameterValue) -> dict:
     """get monthly wind speed and direction averaged over last 10 years """
 
@@ -60,7 +63,7 @@ def get_wind_data(bb: BoundingBox, parameter: WindParameterValue) -> dict:
     return wind_data
 
 
-@app.get("/api/contour_lines/", tags=["Sector Map"])
+@app.post("/api/contour_lines/", tags=["Sector Map"])
 def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolution: Resolution) -> dict:
     """get contour lines within bounding box, interpolated to contour interval. """
 
