@@ -6,3 +6,4 @@ geojson
 pyproj
 shapely
 fastapi[all]
+httpx

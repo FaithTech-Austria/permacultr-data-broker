@@ -44,7 +44,7 @@ def validate_bounding_box_size(bbox: BoundingBox, max_size_bb_ha: int) -> None:
     )
 
     area_meters = (max_x - min_x) * (max_y - min_y)
-    area_ha = area_meters / 100000
+    area_ha = area_meters / 10000
 
     if area_ha > max_size_bb_ha:
         raise HTTPException(
