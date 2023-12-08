@@ -11,7 +11,7 @@ CDS_API_KEY = os.getenv("CDS_API_KEY")
 c = cdsapi.Client(url=CDS_API_URL, key=CDS_API_KEY)
 
 
-def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: list):
+def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: list) -> None:
     """get monthly averaged wind data of past 5 years 
     File is saved as netcdf in specified directory"""
 
@@ -35,5 +35,27 @@ def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: lis
             'time': '00:00',
             'area': bb_list,
             'format': 'netcdf',
+        },
+        path_to_output)
+
+
+def get_agroclimatic_indicator(path_to_output: str, parameter: str) -> None:
+    """
+    Downloads 
+    Agroclimatic indicators 
+    https://cds.climate.copernicus.eu/cdsapp#!/dataset/sis-agroclimatic-indicators?tab=overview
+    output must be a zip or tar.gz
+    """
+
+    c.retrieve(
+        'sis-agroclimatic-indicators',
+        {
+            'format': 'zip',
+            'origin': 'era_interim_reanalysis',
+            'variable': parameter,
+            'experiment': 'historical',
+            'temporal_aggregation': '10_day',
+            'period': '198101_201012',
+            'version': '1.1',
         },
         path_to_output)

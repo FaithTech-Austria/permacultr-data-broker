@@ -10,10 +10,6 @@ The data broker accesses various APIs, transforms the data and exposes the trans
 
 ## TODOs
 
-- It can happen that the API freezes when the bb box is too big
-  - Implement Error saying that request is too big
-  - Set maximum bounding box size
-  - Try out streaming json (https://www.vidavolta.io/streaming-with-fastapi/)
 - Update readme
 - Implement tests, which can be run each time I make changes
 
