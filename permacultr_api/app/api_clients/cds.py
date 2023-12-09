@@ -11,7 +11,7 @@ CDS_API_KEY = os.getenv("CDS_API_KEY")
 c = cdsapi.Client(url=CDS_API_URL, key=CDS_API_KEY)
 
 
-def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: list) -> None:
+def download_wind_data_from_cds(path_to_output: str, bounding_box: dict, years: list) -> None:
     """get monthly averaged wind data of past 5 years 
     File is saved as netcdf in specified directory"""
 
@@ -39,7 +39,7 @@ def get_historical_wind_data(path_to_output: str, bounding_box: dict, years: lis
         path_to_output)
 
 
-def get_agroclimatic_indicator(path_to_output: str, parameter: str) -> None:
+def download_agroclimatic_indicators_from_cds(path_to_output: str, parameter: str) -> None:
     """
     Downloads 
     Agroclimatic indicators 

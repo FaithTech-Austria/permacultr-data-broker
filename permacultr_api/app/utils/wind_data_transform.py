@@ -54,8 +54,6 @@ def create_wind_geojson(path_to_wind_nc_file: str, wind_property: str, years: li
         elif wind_property == "direction":
             wind_mnt_avg = calculate_monthly_averages(wind_direction, nr_years)
 
-        print(f"Hello: {wind_property}")
-
         # Transform aggregated nc file to geojson
         latitude = nc_file.variables["latitude"][:]
         longitude = nc_file.variables["longitude"][:]

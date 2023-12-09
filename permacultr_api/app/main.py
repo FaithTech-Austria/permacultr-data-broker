@@ -4,25 +4,28 @@ import geojson
 from dotenv import load_dotenv
 import os
 
-from app.api_clients.cds import get_historical_wind_data
+from app.api_clients.cds import download_wind_data_from_cds, download_agroclimatic_indicators_from_cds
 from app.api_clients.osmnx import get_data_from_osmnx
 from app.api_clients.open_elevation import get_elevation_data
 from app.utils.utils import validate_bounding_box_size
 from app.utils.wind_data_transform import create_wind_geojson
+from app.utils.agroclimatic_indicators_transform import create_agroclimatic_indicators_json
 from app.utils.elevation_data_transform import (
     extract_elevation_data,
     create_regular_grid,
     create_elevation_raster,
     create_contour_lines_geojson)
-from app.models import BoundingBox, WindParameterValue, ContourInterval, Resolution, NetworkTypeValue
+from app.models import (BoundingBox, WindParameterValue, ContourInterval,
+                        Resolution, NetworkTypeValue, AgroclimaticIndicator)
 
 
-load_dotenv("/code/.env")
+load_dotenv()
 
 # Load paths from env variables
 PATH_TO_HISTORIC_WIND_DATA = os.getenv("PATH_TO_HISTORIC_WIND_DATA")
 PATH_TO_ELEVATION_RASTER = os.getenv("PATH_TO_ELEVATION_RASTER")
 PATH_TO_CONTOUR_LINES = os.getenv("PATH_TO_CONTOUR_LINES")
+PATH_TO_AGROCLIMATIC_INDICATORS = os.getenv("PATH_TO_AGROCLIMATIC_INDICATORS")
 
 app = FastAPI()
 
@@ -56,7 +59,7 @@ def get_wind_data(bb: BoundingBox, parameter: WindParameterValue) -> dict:
     # Download data from CDS for last 10 years from today
     today = datetime.date.today()
     years = [str(today.year - i) for i in range(1, 10)]
-    get_historical_wind_data(PATH_TO_HISTORIC_WIND_DATA, bb, years)
+    download_wind_data_from_cds(PATH_TO_HISTORIC_WIND_DATA, bb, years)
     wind_data = create_wind_geojson(
         PATH_TO_HISTORIC_WIND_DATA, parameter, years)
 
@@ -102,3 +105,15 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolu
         contour_lines = geojson.load(f)
 
     return contour_lines
+
+
+@app.post("/api/agroclimatic_indicators/", tags=["Climatic Info"])
+def get_agroclimatic_indicators_data(bb: BoundingBox, parameter: AgroclimaticIndicator) -> dict:
+    """get agroclimatic indicators for period 1981 - 2010"""
+
+    download_agroclimatic_indicators_from_cds(
+        PATH_TO_AGROCLIMATIC_INDICATORS, parameter.value)
+    # create dict of data at specific location
+    agroclimatic_indicator_dict = create_agroclimatic_indicators_json(
+        PATH_TO_AGROCLIMATIC_INDICATORS, bb, parameter.value)
+    return agroclimatic_indicator_dict

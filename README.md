@@ -11,8 +11,11 @@ The data broker accesses various APIs, transforms the data and exposes the trans
 ## TODOs
 
 - Update readme
+- Implement agroclimatic indicators
 - Implement tests, which can be run each time I make changes
 
 ## Backlog
 
+- How to save intermediate data?
+  - There might be more users downloading data at the same time
 - Integration of GraphCast weather forecasting into service
