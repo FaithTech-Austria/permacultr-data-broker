@@ -4,7 +4,7 @@ The data broker accesses various APIs, transforms the data and exposes the trans
 
 ## Set-UP
 
-- Create a .env file in the project root directory+
+- Create a .env file in the project root directory
 - Here you can store all API keys and other credentials
 - For using the CDS API set **CDS_API_URL** and **CDS_API_KEY**
 
@@ -12,6 +12,9 @@ The data broker accesses various APIs, transforms the data and exposes the trans
 
 - Update readme
 - Implement agroclimatic indicators
+  - Predownload of data
+  - Mapping from parameter to data path
+  - BEDD file seems to big to load. Slim it down
 - Implement tests, which can be run each time I make changes
 
 ## Backlog

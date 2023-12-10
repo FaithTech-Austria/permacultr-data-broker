@@ -19,13 +19,18 @@ from app.models import (BoundingBox, WindParameterValue, ContourInterval,
                         Resolution, NetworkTypeValue, AgroclimaticIndicator)
 
 
+# mapping between agroclimatic indicator to path where data is stored
+PATH_TO_AC_DATA = {
+    "biologically_effective_degree_days": "PATH_TO_BEDD"
+}
+
+
 load_dotenv()
 
 # Load paths from env variables
 PATH_TO_HISTORIC_WIND_DATA = os.getenv("PATH_TO_HISTORIC_WIND_DATA")
 PATH_TO_ELEVATION_RASTER = os.getenv("PATH_TO_ELEVATION_RASTER")
 PATH_TO_CONTOUR_LINES = os.getenv("PATH_TO_CONTOUR_LINES")
-PATH_TO_AGROCLIMATIC_INDICATORS = os.getenv("PATH_TO_AGROCLIMATIC_INDICATORS")
 
 app = FastAPI()
 
@@ -111,9 +116,15 @@ def get_contour_lines(contour_interval: ContourInterval, bb: BoundingBox, resolu
 def get_agroclimatic_indicators_data(bb: BoundingBox, parameter: AgroclimaticIndicator) -> dict:
     """get agroclimatic indicators for period 1981 - 2010"""
 
-    download_agroclimatic_indicators_from_cds(
-        PATH_TO_AGROCLIMATIC_INDICATORS, parameter.value)
+    # download_agroclimatic_indicators_from_cds(
+    #    PATH_TO_AGROCLIMATIC_INDICATORS, parameter.value)
     # create dict of data at specific location
+
+    path_to_data = PATH_TO_AC_DATA[parameter]
+    path_to_nc_file = os.getenv(path_to_data)
+
     agroclimatic_indicator_dict = create_agroclimatic_indicators_json(
-        PATH_TO_AGROCLIMATIC_INDICATORS, bb, parameter.value)
+        path_to_nc_file, bb, parameter)
+    # return agroclimatic_indicator_dict
+
     return agroclimatic_indicator_dict

@@ -3,6 +3,11 @@ import numpy as np
 import datetime
 
 
+VARIABLE_NAMES = {
+    "biologically_effective_degree_days": "BEDD"
+}
+
+
 def get_nc_data_at_location(site_lat: float, site_lon: float, lat: np.array, lon: np.array, var: np.array) -> np.array:
     """get data of nc grid cell at specific location"""
 
@@ -14,11 +19,13 @@ def get_nc_data_at_location(site_lat: float, site_lon: float, lat: np.array, lon
 def create_agroclimatic_indicators_json(path_to_nc_file: str, bounding_box: dict, parameter: str) -> dict:
     """Create dict for agroclimatic indicator data containing date and value for a specific parameter at the location of the bounding box."""
 
+    parameter_short_name = VARIABLE_NAMES[parameter]
+
     with nc.Dataset(path_to_nc_file, "r") as f:
         lat = f.variables['lat'][:]
         lon = f.variables['lon'][:]
         time = f.variables['time'][:]
-        var = f.variables[parameter][:]
+        var = f.variables[parameter_short_name][:]
 
     values = get_nc_data_at_location(
         bounding_box.max_lat, bounding_box.max_lon, lat, lon, var)
