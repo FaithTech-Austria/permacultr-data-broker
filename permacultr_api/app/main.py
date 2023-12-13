@@ -6,7 +6,8 @@ import os
 
 from app.api_clients.cds import download_wind_data_from_cds, download_agroclimatic_indicators_from_cds
 from app.api_clients.osmnx import get_data_from_osmnx
-from app.api_clients.open_elevation import get_elevation_data
+# from app.api_clients.open_elevation import get_elevation_data
+from app.api_clients.opentopodata import get_elevation_data
 from app.utils.utils import validate_bounding_box_size
 from app.utils.wind_data_transform import create_wind_geojson
 from app.utils.agroclimatic_indicators_transform import create_agroclimatic_indicators_json
